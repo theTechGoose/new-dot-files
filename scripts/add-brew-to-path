@@ -1,0 +1,9 @@
+#!/bin/bash
+BASHRCPATH=$HOME/.bashrc
+
+echo adding brew to bashrc at $BASHRCPATH
+
+echo >> $BASHRCPATH
+echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> $BASHRCPATH
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+

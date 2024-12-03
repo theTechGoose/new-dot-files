@@ -1,0 +1,2 @@
+docker build -t dotbot-test . &&
+docker run --rm -it dotbot-test /bin/bash
