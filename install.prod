@@ -2,9 +2,9 @@
 
 # Prompt for sudo password if necessary
 sudo -v || { echo "Failed to authenticate as sudo"; exit 1; }
-REPO_PATH="/dotfiles"
-USER=""
-PASS=""
+REPO_PATH="."
+USER=$(whoami)
+PASS="6994"
 
 # Define the user and the rule to append
 USER=$(whoami)
@@ -36,7 +36,7 @@ SUBMODULE_PATH="lib/pyyaml"
 
 # Step 1: Check and fix permissions for the repository
 echo "Fixing permissions for $REPO_PATH..."
-sudo chown -R "$(whoami):$(whoami)" "$REPO_PATH"
+sudo chown -R "$USER:$PASS" "$REPO_PATH"
 sudo chmod -R u+rw "$REPO_PATH"
 
 # Step 2: Check if the submodule exists and clean it up if needed

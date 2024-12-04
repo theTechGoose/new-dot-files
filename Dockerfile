@@ -8,7 +8,8 @@ ENV DISPLAY=${DISPLAY:-:0.0} \
     SHORTNAME=sonoma
 
 WORKDIR /dotfiles
-Copy ./scripts /dotfiles/scripts
+COPY ./scripts /dotfiles/scripts
+COPY ./scripts/install-if-needed /usr/local/bin
 
 # Install Brew
 RUN ./scripts/install-brew
@@ -22,10 +23,14 @@ ENV INFOPATH="/home/linuxbrew/.linuxbrew/share/info:${INFOPATH}"
 RUN sudo pacman -S --noconfirm base-devel
 
 # Use Brew to install packages
-RUN brew install gcc neovim zsh
+RUN brew install gcc neovim zsh unzip
 
 # Install Oh My Zsh
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 COPY . /dotfiles
 RUN ./scripts/fix-git
+USER root
+RUN chmod +x /usr/local/bin/install-if-needed
+USER arch
+ENTRYPOINT ["sh", "-c", "./install && exec zsh"]

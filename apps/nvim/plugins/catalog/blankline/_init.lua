@@ -1,0 +1,16 @@
+local Plugin = require("utils.plugin-template")
+local blankline = Plugin:new("lukas-reineke/indent-blankline.nvim")
+blankline:load_on_event("User FilePost")
+blankline:opt('indent.char', "│") 
+blankline:opt('indent.highlight', "IblChar") 
+blankline:opt('scope.char', "│") 
+blankline:opt('scope.highlight', "IblScopeChar") 
+blankline:cfg(function(_, opts)
+      dofile(vim.g.base46_cache .. "blankline")
+      local hooks = require "ibl.hooks"
+      hooks.register(hooks.type.WHITESPACE, hooks.builtin.hide_first_space_indent_level)
+      require("ibl").setup(opts)
+      dofile(vim.g.base46_cache .. "blankline")
+end)
+
+return blankline:serialize()

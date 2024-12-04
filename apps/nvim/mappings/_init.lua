@@ -1,0 +1,1 @@
+require "mappings.catalog.core"

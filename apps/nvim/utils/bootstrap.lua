@@ -1,3 +1,4 @@
+vim.g.base46_cache = vim.fn.stdpath "data" .. "/base46/"
 -- Add your Neovim configuration directory to Lua's package path
 local config_path = vim.fn.stdpath('config') .. '/'
 

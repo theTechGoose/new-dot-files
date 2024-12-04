@@ -5,26 +5,5 @@
       force: true
 
 - link:
-    ~/.p10k.zsh: apps/zsh/p10k.zsh
     ~/.zshrc: apps/zsh/zshrc
     ~/.config/nvim: apps/nvim
-
-- shell:
-    - command: sudo pacman -S --noconfirm base-devel
-      description: installing brew deps
-      stdout: true
-    - command: brew install gcc
-      description: adding gcc
-      stdout: true
-    - command: brew install neovim
-      description: Installing Nvim
-      stdout: true
-    - command: brew install zsh
-      description: Installing ZSH
-      stdout: true
-    - command: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-      description: Installing Oh-My-ZSH
-      stdout: true
-    - command: brew install powerlevel10k
-      description: Installing p10k
-      stdout: true

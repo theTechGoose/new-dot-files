@@ -7,10 +7,14 @@ function Plugin:new(pluginName, opts)
   local instance = {
     plugin = pluginName,
     type = opts.type or "remote",
-    config = {},
+    config = function() end,
     dependencies = {},
     opts = {},
     keys = {},
+    command = {},
+    lazy = nil,
+    event = nil,
+    build = nil
   }
   if instance.type == "local" then
     instance.plugin = { dir = vim.fn.expand(pluginName:match("^~") and pluginName or "~/projects/" .. pluginName) }
@@ -20,16 +24,8 @@ function Plugin:new(pluginName, opts)
 end
 
 -- Set load conditions (event, filetype, etc.)
-function Plugin:load_on(condition, ...)
-  local args = { ... }
-  if condition == "event" then
-    self.config.event = #args == 1 and args[1] or args
-  elseif condition == "ft" then
-    self.config.ft = #args == 1 and args[1] or args
-  else
-    error("Unsupported load condition: " .. condition)
-  end
-  return self
+function Plugin:load_on_event(identifier)
+	self.event= identifier
 end
 
 -- Mark the plugin as local
@@ -39,7 +35,7 @@ function Plugin:set_as_local()
 end
 
 function Plugin.exec(name)
-	pcall(function() 
+	pcall(function()
 dofile(vim.g.base46_cache .. name)
 	end)
 return self
@@ -55,21 +51,88 @@ function Plugin:dep(dep)
   return self
 end
 
--- Add an option
+function Plugin:cmd(cmd)
+	table.insert(self.command, cmd)
+end
+
+function Plugin:bld(fn)
+	self.build = fn
+end
+
+function Plugin:toggle_lazy()
+	if self.lazy == nil then
+		self.lazy = false
+		return self
+	end
+	self.lazy = not self.lazy
+	return self
+end
+
+function Plugin:opts_as_fn(fn)
+	self.opts = fn
+end
+
+-- Add an option with support for dot notation keys
 function Plugin:opt(key, value)
-  self.opts[key] = value
+  -- Initialize self.opts if necessary
+  if type(self.opts) ~= "table" then
+    self.opts = {}
+  end
+
+  -- Validate key
+  if type(key) ~= "string" or key == "" then
+    error("Key must be a non-empty string")
+  end
+
+  local t = self.opts
+  local keys = {}
+
+  -- Split the key by dots, ignoring empty segments
+  for k in string.gmatch(key, "[^%.]+") do
+    if k ~= "" then
+      table.insert(keys, k)
+    else
+      error("Invalid key segment: empty string")
+    end
+  end
+
+  -- Traverse or create nested tables
+  for i = 1, #keys - 1 do
+    local k = keys[i]
+
+    -- Check if the existing value is a table
+    if t[k] ~= nil and type(t[k]) ~= "table" then
+      error(string.format("Cannot index non-table value at '%s'", table.concat(keys, ".", 1, i)))
+    end
+
+    t[k] = t[k] or {}
+    t = t[k]
+  end
+
+  local finalKey = keys[#keys]
+
+  -- Optional: Check if finalKey already exists
+  if t[finalKey] ~= nil then
+    -- Decide whether to overwrite or raise an error
+    -- For this example, we'll overwrite and issue a warning
+    print(string.format("Warning: Overwriting existing value at '%s'", key))
+  end
+
+  -- Set the final value
+  t[finalKey] = value
+
   return self
 end
 
 -- Map a key
 function Plugin:map(mode, lhs, rhs, filetype)
-  table.insert(self.keys, { mode = mode, lhs = lhs, rhs = rhs, ft = filetype })
+  table.insert(self.keys, {lhs, rhs, mode=mode})
   return self
 end
 
 -- Set config function
 function Plugin:cfg(fn)
-  self.config.config = fn
+  self.config = fn
   return self
 end
 
@@ -84,12 +147,25 @@ end
 
 -- Serialize the plugin configuration for LazyNvim
 function Plugin:serialize()
-  local serialized = vim.tbl_deep_extend("force", {
+local opts_not_fn = type(self.opts) ~= "function"
+local opts = self.opts
+if(opts_not_fn) then opts = next(self.opts) and self.opts or nil end
+
+
+	local serialized = {
     self.plugin,
     dependencies = #self.dependencies > 0 and self:_serialize_dependencies() or nil,
-    opts = next(self.opts) and self.opts or nil,
+    opts = opts,
     keys = #self.keys > 0 and self.keys or nil,
-  }, self.config)
+    cmd = #self.command > 0 and self.command or nil,
+    build = self.build and self.build or nil,
+    lazy = self.lazy == nil,
+    event = self.event ~= nil and self.event or nil,
+    config = self.config and self.config or nil
+  }
+  if self.lazy ~= nil then
+	  serialized.lazy = self.lazy
+  end
   return serialized
 end
 
