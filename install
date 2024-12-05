@@ -1,25 +1,5 @@
 #!/usr/bin/env bash
 
-# Prompt for sudo password if necessary
-sudo -v || { echo "Failed to authenticate as sudo"; exit 1; }
-REPO_PATH="/dotfiles"
-USER=""
-PASS=""
-
-# Define the user and the rule to append
-USER=$(whoami)
-RULE="$USER ALL=(ALL) NOPASSWD:ALL"
-
-# Check if the rule already exists in the sudoers file
-if sudo grep -q "$RULE" /etc/sudoers; then
-    echo "Passwordless sudo is already configured for user $USER."
-else
-    # Append the rule to the sudoers file
-    echo "$RULE" | sudo tee -a /etc/sudoers > /dev/null
-    echo "Passwordless sudo has been configured for user $USER."
-fi
-
-
 set -e
 
 CONFIG="install.conf.yaml"
@@ -29,57 +9,6 @@ DOTBOT_BIN="bin/dotbot"
 BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 cd "${BASEDIR}"
-git config --global safe.directory '*'
-# Variables
-SUBMODULE_PATH="lib/pyyaml"
-
-
-# Step 1: Check and fix permissions for the repository
-echo "Fixing permissions for $REPO_PATH..."
-sudo chown -R "$(whoami):$(whoami)" "$REPO_PATH"
-sudo chmod -R u+rw "$REPO_PATH"
-
-# Step 2: Check if the submodule exists and clean it up if needed
-if [ -d "$REPO_PATH/$SUBMODULE_PATH" ]; then
-  echo "Cleaning up the submodule at $SUBMODULE_PATH..."
-  sudo git -C "$REPO_PATH" submodule deinit -f -- "$SUBMODULE_PATH"
-  sudo rm -rf "$REPO_PATH/.git/modules/$SUBMODULE_PATH"
-  sudo rm -rf "$REPO_PATH/$SUBMODULE_PATH"
-else
-  echo "No submodule found at $SUBMODULE_PATH. Skipping cleanup."
-fi
-
-# Step 3: Reinitialize and update all submodules
-echo "Reinitializing and updating submodules..."
-sudo git -C "$REPO_PATH" submodule update --init --recursive
-
-# Step 4: Verify configuration files
-echo "Checking Git configuration..."
-CONFIG_FILE="$REPO_PATH/.git/modules/dotbot/config"
-if [ -f "$CONFIG_FILE" ]; then
-  echo "Fixing permissions for Git config file..."
-  sudo chmod u+rw "$CONFIG_FILE"
-else
-  echo "No config file found at $CONFIG_FILE. Skipping."
-fi
-
-# Step 5: Final cleanup and summary
-echo "Verifying repository status..."
-
-
-# Check if Homebrew is installed
-if command -v brew &>/dev/null; then
-    echo "Homebrew is already installed."
-else
-    echo "Homebrew is not installed. Installing Homebrew..."
-    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    if command -v brew &>/dev/null; then
-        echo "Homebrew installed successfully!"
-    fi
-fi
-
-source ./scripts/add-brew-to-path
-
 git -C "${DOTBOT_DIR}" submodule sync --quiet --recursive
 git submodule update --init --recursive "${DOTBOT_DIR}"
 
