@@ -163,6 +163,10 @@ if(opts_not_fn) then opts = next(self.opts) and self.opts or nil end
     event = self.event ~= nil and self.event or nil,
     config = self.config and self.config or nil
   }
+
+  if(self.plugin == 'hrsh7th/nvim-cmp') then
+    print(vim.inspect(serialized))
+  end
   if self.lazy ~= nil then
 	  serialized.lazy = self.lazy
   end

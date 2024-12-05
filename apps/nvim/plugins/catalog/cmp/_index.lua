@@ -1,8 +1,8 @@
-local Plugin = require("utils.plugin-template")	
+local Plugin = require("utils.plugin-template")
 local luasnip = require("plugins.catalog.cmp.luasnip")
 local autopairs = require("plugins.catalog.cmp.autopairs")
 local plugin = Plugin:new("hrsh7th/nvim-cmp")
-plugin:load_on_event("InsertEnter")
+--plugin:load_on_event("InsertEnter")
 
 -- Deps
 plugin:dep(luasnip)
@@ -13,25 +13,32 @@ plugin:dep(Plugin:new("hrsh7th/cmp-nvim-lsp"))
 plugin:dep(Plugin:new("hrsh7th/cmp-buffer"))
 plugin:dep(Plugin:new("hrsh7th/cmp-path"))
 
+
 -- Opts
-plugin:opt('completion', { completeopt = "menu,menuone" })
-plugin:opt('snippet.expand', function(args)
-  require("luasnip").lsp_expand(args.body)
+plugin:opts_as_fn(function(_, opts)
+  local cmp = require "cmp"
+  local payload = {
+    completion = { completeopt = "menu,menuone" },
+    snippet = {
+      expand = function(args)
+        require("luasnip").lsp_expand(args.body)
+      end,
+    },
+    sources = {
+      { name = "nvim_lsp" },
+      { name = "luasnip" },
+      { name = "buffer" },
+      { name = "nvim_lua" },
+      { name = "path" },
+    },
+  }
+
+  return payload
 end)
 
-plugin:opt('sources', {
-	{ name = "nvim_lsp" },
-	{ name = "luasnip" },
-	{ name = "buffer" },
-	{ name = "nvim_lua" },
-	{ name = "path" },
-})
-
-
-
 -- Mappings
-plugin:map('i', "<C-p>", function() 
-	require("cmp").mapping.select_prev_item()
+plugin:map('i', "<C-p>", function()
+  require("cmp").mapping.select_prev_item()
 end)
 
 -- Helper function to feed keys
@@ -108,4 +115,3 @@ end
 plugin:map({ 'i', 's' }, '<S-Tab>', s_tab_complete)
 
 return plugin:serialize()
-

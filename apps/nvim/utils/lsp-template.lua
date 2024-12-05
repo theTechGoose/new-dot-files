@@ -61,7 +61,6 @@ local _payload = {
 
  local payload = vim.tbl_deep_extend("force", _payload, opts or {})
 
-
 	lsp[self.name].setup(payload)
  return self
 end
