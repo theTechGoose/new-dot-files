@@ -1,29 +1,3 @@
--- local LspServer = require("utils.lsp-template")
---
--- local lua = LspServer:new('lua_ls')
--- local specific_settings = {
---   settings = {
---     Lua = {
---       diagnostics = {
---         globals = { "vim" },
---       },
---       workspace = {
---         library = {
---           vim.fn.expand "$VIMRUNTIME/lua",
---           vim.fn.expand "$VIMRUNTIME/lua/vim/lsp",
---           vim.fn.stdpath "data" .. "/lazy/ui/nvchad_types",
---           vim.fn.stdpath "data" .. "/lazy/lazy.nvim/lua/lazy",
---           vim.fn.stdpath "config"
---         },
---         maxPreload = 100000,
---         preloadFileSize = 10000,
---       },
---     },
---   },
--- }
---
--- lua:configure(specific_settings)
--- import("lspconfig").lua_ls.setup()
 local M = {}
 local map = vim.keymap.set
 
@@ -32,7 +6,6 @@ M.on_attach = function(_, bufnr)
   local function opts(desc)
     return { buffer = bufnr, desc = "LSP " .. desc }
   end
-  print('attaching!!')
 
   map("n", "gD", vim.lsp.buf.declaration, opts "Go to declaration")
   map("n", "gd", vim.lsp.buf.definition, opts "Go to definition")
@@ -99,6 +72,7 @@ M.defaults = function()
             vim.fn.expand "$VIMRUNTIME/lua/vim/lsp",
             vim.fn.stdpath "data" .. "/lazy/ui/nvchad_types",
             vim.fn.stdpath "data" .. "/lazy/lazy.nvim/lua/lazy",
+            "${3rd}/luv/library",
           },
           maxPreload = 100000,
           preloadFileSize = 10000,
@@ -107,11 +81,5 @@ M.defaults = function()
     },
   }
 end
-
-  require('lspconfig').lua_ls.setup {
-    on_attach = M.on_attach,
-    on_init = M.on_init,
-    capabilities = M.capabilities,
-  }
 
 return M
