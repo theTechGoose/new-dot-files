@@ -1,34 +1,45 @@
 return {
 	"nvim-lua/plenary.nvim",
-{
-  "christoomey/vim-tmux-navigator",
-  cmd = {
-    "TmuxNavigateLeft",
-    "TmuxNavigateDown",
-    "TmuxNavigateUp",
-    "TmuxNavigateRight",
-    "TmuxNavigatePrevious",
-  },
-  keys = {
-    { "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
-    { "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
-    { "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
-    { "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
-    { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
-  },
-},
+	{ "echasnovski/mini.nvim", lazy=false, version = "*", config = function()
+		require("mini.animate").setup()
+		require("mini.indentscope").setup()
+		require("mini.icons").setup()
+		require("mini.ai").setup()
+		require("mini.operators").setup()
+		require("mini.surround").setup()
+		require("mini.basics").setup()
+
+	end },
+	{
+		"christoomey/vim-tmux-navigator",
+		cmd = {
+			"TmuxNavigateLeft",
+			"TmuxNavigateDown",
+			"TmuxNavigateUp",
+			"TmuxNavigateRight",
+			"TmuxNavigatePrevious",
+		},
+		keys = {
+			{ "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+			{ "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+			{ "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+			{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+			{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+		},
+	},
 	{
 		"vim-test/vim-test",
 		dependencies = {
-					"tpope/vim-dispatch"
+			"tpope/vim-dispatch",
 		},
 		keys = {
-			{"<leader>tn", "<CMD>TestNearest<CR>"}
+			{ "<leader>tn", "<CMD>TestNearest NO_COLOR=true<CR>" },
+			{ "<leader>tl", "<CMD>TestLast NO_COLOR=true<CR>" },
 		},
 		config = function()
-			vim.g['test#strategy'] = 'dispatch'
-			vim.g['test#javascript#runner'] = 'denotest'
-		end
+			vim.g["test#strategy"] = "dispatch"
+			vim.g["test#javascript#runner"] = "denotest"
+		end,
 	},
 	{
 		"smoka7/hop.nvim",
@@ -154,7 +165,9 @@ return {
 		"neovim/nvim-lspconfig",
 		event = "User FilePost",
 		config = function()
-			require("configs.lspconfig").defaults()
+			local lsp = require("configs.lspconfig")
+			lsp.defaults()
+			lsp.configureServers("denols", "jsonls")
 		end,
 	},
 
