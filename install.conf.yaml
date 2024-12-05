@@ -7,3 +7,5 @@
 - link:
     ~/.zshrc: apps/zsh/zshrc
     ~/.config/nvim: apps/nvim
+    ~/.tmux.conf: apps/tmux/tmux.conf
+    ~/.tmux.conf.local: apps/tmux/tmux.conf.local
